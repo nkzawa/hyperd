@@ -29,8 +29,8 @@
     "xtend": "4.0.0"
   },
   "devDependencies": {
-    "browserify": "~9.0.7",
-    "es5-shim": "~4.1.0",
+    "browserify": "~9.0.8",
+    "es5-shim": "~4.1.1",
     "expect.js": "~0.3.1",
     "phantomjs": "~1.9.16",
     "zuul": "~2.1.1"
