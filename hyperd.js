@@ -11,36 +11,7 @@ function hyperd(node, render) {
   return component.attachTo(node);
 }
 
-},{"./lib/component":3}],2:[function(require,module,exports){
-
-module.exports = Widget;
-
-function Widget(Component, properties) {
-  this.Component = Component;
-  this.properties = properties;
-  this.component = null;
-  this.rendered = false;
-}
-
-Widget.prototype.type = 'Widget';
-
-Widget.prototype.init = function() {
-  this.component = new this.Component(this.properties);
-  this.rendered = this.component.doRender();
-  return this.component.node;
-};
-
-Widget.prototype.update = function(previous, domNode) {
-  this.component = previous.component;
-  this.component.setProps(this.properties);
-  this.rendered = this.component.doRender();
-};
-
-Widget.prototype.destroy = function(domNode) {
-  this.component.destroy();
-};
-
-},{}],3:[function(require,module,exports){
+},{"./lib/component":2}],2:[function(require,module,exports){
 (function (global){
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
@@ -52,7 +23,7 @@ var clone = require('clone');
 var equal = require('deep-equal');
 var extend = require('xtend/mutable');
 var trim = require('trim');
-var Widget = require('./Widget');
+var Widget = require('./widget');
 var slice = Array.prototype.slice;
 var emit = EventEmitter.prototype.emit;
 var on = EventEmitter.prototype.on;
@@ -350,7 +321,36 @@ Component.prototype.emitRender = function() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Widget":2,"clone":28,"deep-equal":29,"dom-delegate":33,"events":9,"raf":34,"trim":36,"util":27,"virtual-dom":40,"virtual-html":71,"xtend/mutable":77}],4:[function(require,module,exports){
+},{"./widget":3,"clone":28,"deep-equal":29,"dom-delegate":33,"events":9,"raf":34,"trim":36,"util":27,"virtual-dom":40,"virtual-html":71,"xtend/mutable":77}],3:[function(require,module,exports){
+
+module.exports = Widget;
+
+function Widget(Component, properties) {
+  this.Component = Component;
+  this.properties = properties;
+  this.component = null;
+  this.rendered = false;
+}
+
+Widget.prototype.type = 'Widget';
+
+Widget.prototype.init = function() {
+  this.component = new this.Component(this.properties);
+  this.rendered = this.component.doRender();
+  return this.component.node;
+};
+
+Widget.prototype.update = function(previous, domNode) {
+  this.component = previous.component;
+  this.component.setProps(this.properties);
+  this.rendered = this.component.doRender();
+};
+
+Widget.prototype.destroy = function(domNode) {
+  this.component.destroy();
+};
+
+},{}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 /*!
