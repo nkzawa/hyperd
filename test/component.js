@@ -35,6 +35,36 @@ describe('Component', function() {
     });
   });
 
+  describe('#emit', function() {
+    it('should dispatch a custom dom event', function(done) {
+      var Main = hyperd.Component.extend({
+        render: function() {
+          return '<div class="main"/>';
+        },
+        onRender: function() {
+          this.emit('foo', 'hi');
+        }
+      });
+      var App = hyperd.Component.extend({
+        components: {
+          main: Main
+        },
+        constructor: function() {
+          hyperd.Component.apply(this, arguments);
+          this.on('foo', '.main', function(e, v) {
+            expect(v).to.eql('hi');
+            this.destroy();
+            done();
+          });
+        },
+        render: function() {
+          return '<div><main/></div>';
+        }
+      });
+      new App().attachTo(this.node);
+    });
+  });
+
   describe('#on', function() {
     it('should listen a delegated event', function(done) {
       var Component = hyperd.Component.extend({
