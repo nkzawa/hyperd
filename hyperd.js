@@ -19,20 +19,21 @@ function Widget(Component, properties) {
   this.Component = Component;
   this.properties = properties;
   this.component = null;
+  this.rendered = false;
 }
 
 Widget.prototype.type = 'Widget';
 
 Widget.prototype.init = function() {
   this.component = new this.Component(this.properties);
-  this.component.tick();
+  this.rendered = this.component.doRender();
   return this.component.node;
 };
 
 Widget.prototype.update = function(previous, domNode) {
   this.component = previous.component;
   this.component.setProps(this.properties);
-  this.component.tick();
+  this.rendered = this.component.doRender();
 };
 
 Widget.prototype.destroy = function(domNode) {
@@ -40,8 +41,9 @@ Widget.prototype.destroy = function(domNode) {
 };
 
 },{}],3:[function(require,module,exports){
+(function (global){
 var EventEmitter = require('events').EventEmitter;
-var inherits = require('util').inherits;
+var util = require('util');
 var virtualDOM = require('virtual-dom');
 var virtualHTML = require('virtual-html');
 var delegate = require('dom-delegate');
@@ -51,6 +53,9 @@ var equal = require('deep-equal');
 var extend = require('xtend/mutable');
 var trim = require('trim');
 var Widget = require('./Widget');
+var slice = Array.prototype.slice;
+var emit = EventEmitter.prototype.emit;
+var on = EventEmitter.prototype.on;
 
 var events = [
   'render',
@@ -59,7 +64,7 @@ var events = [
 
 module.exports = Component;
 
-inherits(Component, EventEmitter);
+util.inherits(Component, EventEmitter);
 
 Component.extend = function(proto) {
   var Parent = this;
@@ -73,7 +78,7 @@ Component.extend = function(proto) {
     };
   }
 
-  inherits(Child, Parent);
+  util.inherits(Child, Parent);
 
   extend(Child, Parent);
   extend(Child.prototype, proto);
@@ -90,6 +95,8 @@ function Component(props) {
   this.tree = null;
   this.requestId = null;
   this.isDirty = false;
+  this.components = this.components || {};
+  this.widgets = [];
   this.delegate = delegate();
   this.setProps(props);
 }
@@ -113,6 +120,13 @@ Component.prototype.attachTo = function(node) {
 Component.prototype.destroy = function() {
   raf.cancel(this.requestId);
 
+  // destroy child components
+  var widgets = this.widgets;
+  for (var i = 0, len = widgets.length; i < len; i++) {
+    var component = widgets[i].component;
+    component && component.destroy();
+  }
+
   this.props = null;
   this.data = null;
   this.oldData = null;
@@ -121,6 +135,7 @@ Component.prototype.destroy = function() {
   this.tree = null;
   this.requestId = null;
   this.isDirty = false;
+  this.widgets = null;
 
   this.onDestroy && this.onDestroy();
   this.emit('destroy');
@@ -142,6 +157,29 @@ Component.prototype.setProps = function(props) {
  * @override
  */
 
+Component.prototype.emit = function(type) {
+  if (~events.indexOf(type)) {
+    emit.apply(this, arguments);
+    return this;
+  }
+
+  var detail = slice.call(arguments, 1);
+  var event;
+  if (global.CustomEvent) {
+    event = new CustomEvent(type, { bubbles: true, detail: detail });
+  } else {
+    event = document.createEvent('CustomEvent');
+    event.initCustomEvent(type, true, false, detail);
+  }
+  this.node.dispatchEvent(event);
+  return this;
+};
+
+/**
+ * @api public
+ * @override
+ */
+
 Component.prototype.on = function(type, selector, listener) {
   if ('function' === typeof selector) {
     listener = selector;
@@ -149,13 +187,22 @@ Component.prototype.on = function(type, selector, listener) {
   }
 
   if (!selector && ~events.indexOf(type)) {
-    EventEmitter.prototype.on.call(this, type, listener);
+    on.call(this, type, listener);
     return this;
   }
 
-  var l = listener.bind(this);
-  listener.bound = l;
-  this.delegate.on(type, selector, l);
+  var self = this;
+
+  function g(e) {
+    var args = [e];
+    if (util.isArray(e.detail)) {
+      args = args.concat(e.detail);
+    }
+    listener.apply(self, args);
+  }
+
+  listener.listener = g;
+  this.delegate.on(type, selector, g);
   return this;
 };
 
@@ -175,7 +222,7 @@ Component.prototype.removeListener = function(type, selector, listener) {
     return this;
   }
 
-  this.delegate.off(type, selector, listener.bound || listener);
+  this.delegate.off(type, selector, listener.listener || listener);
   return this;
 };
 
@@ -210,9 +257,19 @@ Component.prototype.runLoop = function() {
  */
 
 Component.prototype.tick = function() {
+  if (this.doRender()) {
+    this.emitRender();
+  }
+};
+
+/**
+ * @api private
+ */
+
+Component.prototype.doRender = function() {
   if (!this.isDirty) {
     this.isDirty = !equal(this.data, this.oldData, { strict: true });
-    if (!this.isDirty) return;
+    if (!this.isDirty) return false;
   }
 
   var html = this.render();
@@ -223,8 +280,8 @@ Component.prototype.tick = function() {
   this.oldData = clone(this.data);
   this.tree = tree;
   this.isDirty = false;
-  this.onRender && this.onRender();
-  this.emit('render');
+
+  return true;
 };
 
 /**
@@ -232,16 +289,19 @@ Component.prototype.tick = function() {
  */
 
 Component.prototype.inflate = function(tree) {
-  for (var tagName in this.components) {
-    if (!this.components.hasOwnProperty(tagName)) continue;
+  var components = this.components;
+  for (var tagName in components) {
+    if (!components.hasOwnProperty(tagName)) continue;
     if (tagName.toUpperCase() !== tree.tagName) continue;
-    return new Widget(this.components[tagName], tree.properties);
+    var widget = new Widget(components[tagName], tree.properties);
+    this.widgets.push(widget);
+    return widget;
   }
 
-  tree.children = tree.children.map(function(t) {
-    return this.inflate(t);
-  }, this);
-
+  var children = tree.children || [];
+  for (var i = 0, len = children.length; i < len; i++) {
+    children[i] = this.inflate(children[i]);
+  }
   return tree;
 };
 
@@ -252,6 +312,7 @@ Component.prototype.inflate = function(tree) {
 Component.prototype.createTree = function(html) {
   var tree = virtualHTML(trim(html));
   if (this.components) {
+    this.widgets = [];
     tree = this.inflate(tree);
   }
   return tree;
@@ -271,6 +332,24 @@ Component.prototype.applyTree = function(tree) {
   }
 };
 
+/**
+ * @api private
+ */
+
+Component.prototype.emitRender = function() {
+  var widgets = this.widgets;
+  for (var i = 0, len = widgets.length; i < len; i++) {
+    var widget = widgets[i];
+    if (widget.rendered) {
+      widget.component.emitRender();
+    }
+  }
+
+  this.onRender && this.onRender();
+  this.emit('render');
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Widget":2,"clone":28,"deep-equal":29,"dom-delegate":33,"events":9,"raf":34,"trim":36,"util":27,"virtual-dom":40,"virtual-html":71,"xtend/mutable":77}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
