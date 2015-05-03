@@ -228,4 +228,20 @@ describe('Component', function() {
     var component = new Component().attachTo(this.node);
     component.data = 'hi';
   });
+
+  it('should set key', function(done) {
+    this.node.dataset.hkey = 'foo';
+    var Component = hyperd.Component.extend({
+      render: function() {
+        return '<div data-hkey="foo"/>';
+      },
+      onRender: function() {
+        expect(this.node.dataset.hkey).to.be('foo');
+        expect(this.tree.key).to.be('foo');
+        this.destroy();
+        done();
+      }
+    });
+    new Component().attachTo(this.node);
+  });
 });
