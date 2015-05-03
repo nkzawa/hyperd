@@ -224,7 +224,8 @@ Component.prototype.runLoop = function() {
   var self = this;
   this.requestId = raf(function tick() {
     self.tick();
-    raf(tick);
+    if (!self.node) return;
+    self.requestId = raf(tick);
   });
 };
 
@@ -242,10 +243,25 @@ Component.prototype.tick = function() {
  * @api private
  */
 
+Component.prototype.tickChildren = function() {
+  var widgets = this.widgets;
+  for (var i = 0, len = widgets.length; i < len; i++) {
+    var widget = widgets[i];
+    widget.component && widget.component.tick();
+  }
+};
+
+/**
+ * @api private
+ */
+
 Component.prototype.doRender = function() {
   if (!this.isDirty) {
     this.isDirty = !equal(this.data, this.oldData, { strict: true });
-    if (!this.isDirty) return false;
+    if (!this.isDirty) {
+      this.tickChildren();
+      return false;
+    }
   }
 
   var html = this.render();
