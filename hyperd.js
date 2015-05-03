@@ -83,7 +83,7 @@ function Component(props) {
 
 Component.prototype.attachTo = function(node) {
   this.node = node;
-  this.tree = convertHTML(node.outerHTML);
+  this.tree = convertHTML({ getVNodeKey: getVNodeKey }, node.outerHTML);
   this.delegate.root(node);
   this.runLoop();
   return this;
@@ -305,7 +305,7 @@ Component.prototype.inflate = function(tree) {
  */
 
 Component.prototype.createTree = function(html) {
-  var tree = convertHTML(trim(html));
+  var tree = convertHTML({ getVNodeKey: getVNodeKey }, trim(html));
   if (this.components) {
     this.widgets = [];
     tree = this.inflate(tree);
@@ -343,6 +343,12 @@ Component.prototype.emitRender = function() {
   this.onRender && this.onRender();
   this.emit('render');
 };
+
+function getVNodeKey(attributes) {
+  if (attributes.dataset) {
+    return attributes.dataset.hkey;
+  }
+}
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./widget":3,"clone":29,"deep-equal":30,"dom-delegate":34,"events":9,"html-to-vdom":35,"raf":78,"trim":80,"util":28,"virtual-dom":84,"xtend/mutable":115}],3:[function(require,module,exports){
