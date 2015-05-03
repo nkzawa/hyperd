@@ -169,6 +169,35 @@ describe('Component', function() {
     new App().attachTo(this.node);
   });
 
+  it('should re-render a child component', function(done) {
+    var Child = hyperd.Component.extend({
+      constructor: function() {
+        hyperd.Component.apply(this, arguments);
+        this.data.count = 0;
+      },
+      render: function() {
+        return '<div>' + this.data.count + '</div>';
+      },
+      onRender: function() {
+        expect(this.node.innerHTML).to.be('' + this.data.count);
+        this.data.count++;
+        if (this.data.count > 5) {
+          parent.destroy();
+          done();
+        }
+      }
+    });
+    var Parent = hyperd.Component.extend({
+      components: {
+        child: Child
+      },
+      render: function() {
+        return '<div><child/></div>';
+      }
+    });
+    var parent = new Parent().attachTo(this.node);
+  });
+
   it('should not render when data didn\'t change', function(done) {
     var Component = hyperd.Component.extend({
       constructor: function() {
