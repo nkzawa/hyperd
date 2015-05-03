@@ -344,9 +344,9 @@ Component.prototype.emitRender = function() {
   this.emit('render');
 };
 
-function getVNodeKey(attributes) {
-  if (attributes.dataset) {
-    return attributes.dataset.hkey;
+function getVNodeKey(properties) {
+  if (properties.dataset) {
+    return properties.dataset.hkey;
   }
 }
 
@@ -360,6 +360,7 @@ function Widget(Component, properties) {
   this.properties = properties;
   this.component = null;
   this.rendered = false;
+  this.key = this.properties.dataset ? this.properties.dataset.hkey : null;
 }
 
 Widget.prototype.type = 'Widget';
