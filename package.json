@@ -22,17 +22,17 @@
     "clone": "1.0.2",
     "deep-equal": "1.0.0",
     "dom-delegate": "2.0.3",
+    "html-to-vdom": "nkzawa/html-to-vdom",
     "raf": "2.0.4",
     "trim": "0.0.1",
     "virtual-dom": "2.0.1",
-    "html-to-vdom": "nkzawa/html-to-vdom",
     "xtend": "4.0.0"
   },
   "devDependencies": {
-    "browserify": "~9.0.8",
+    "browserify": "~10.1.0",
     "es5-shim": "~4.1.1",
     "expect.js": "~0.3.1",
     "phantomjs": "~1.9.16",
-    "zuul": "~2.1.1"
+    "zuul": "~3.0.0"
   }
 }
