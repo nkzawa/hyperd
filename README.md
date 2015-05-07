@@ -17,6 +17,8 @@ setInterval(function() {
 }, 1000);
 ```
 
+Differently from any other Virtual DOM based libraries, your UI is defined as just a html string on this library, which allows you to use along with your favorite template engines in a flexible manner.
+
 ## Installation
 
     $ npm install hyperd
@@ -48,10 +50,10 @@ setInterval(function() {
 #### hyperd(node, render)
 
 - `node` HTMLElement Node to attach
-- `render` Function Called upon redrawing, should return a html string.
+- `render` Function Called upon redrawing, must return a html string.
 - Return: hyperd.Component
 
-A short circuit to create a simple component instance.
+A short circuit to create a component instance.
 
 ### Class: hyperd.Component
 
@@ -230,7 +232,7 @@ The same as `component.onDestroy`.
 
 #### Attribute: 'data-hkey'
 
-The identifier used to differentiate a node. Used to reconcile an element will be reordered or destroyed.
+The identifier used to differentiate a node for Virtual DOM diffing. Used to reconcile an element will be reordered or destroyed.
 
 ```js
 hyperd.Component.extend({
