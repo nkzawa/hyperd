@@ -240,7 +240,7 @@ hyperd.Component.extend({
     var items = ['foo', 'bar', 'baz'];
     return '<ul>' + items.map(function(item) {
       return '<li data-hkey="' + item + '">' + item + '</li>';
-    }) + '</ul>';
+    }).join('') + '</ul>';
   }
 });
 ```
