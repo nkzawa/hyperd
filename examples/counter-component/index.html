@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div id="count"></div>
+
+<script src="../../hyperd.js"></script>
+<script>
+var Counter = hyperd.Component.extend({
+  onAttach: function() {
+    this.data.count = 0;
+
+    setInterval(function() {
+      this.data.count++;
+    }.bind(this), 1000);
+  },
+
+  render: function() {
+    return '<div id="count">Counter: ' + this.data.count + '</div>';
+  }
+});
+
+new Counter().attachTo(document.getElementById('count'));
+</script>
+</body>
+</html>

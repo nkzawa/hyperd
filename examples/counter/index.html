@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div id="count"></div>
+
+<script src="../../hyperd.js"></script>
+<script>
+var view = hyperd(document.getElementById('count'), function() {
+  return '<div id="count">Counter: ' + this.data.count + '</div>';
+});
+
+view.data.count = 0;
+
+setInterval(function() {
+  view.data.count++;
+}, 1000);
+</script>
+</body>
+</html>
