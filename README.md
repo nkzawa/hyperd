@@ -3,7 +3,7 @@ Hyperd
 
 [![Build Status](https://travis-ci.org/nkzawa/hyperd.svg)](https://travis-ci.org/nkzawa/hyperd)
 
-Virtual DOM based, template engine agnostic, a lightweight view library.
+Virtual DOM based, template engine agnostic UI library.
 
 ```js
 var component = hyperd(document.getElementById('count'), function() {
@@ -41,8 +41,8 @@ Differently from any other Virtual DOM based libraries, your UI is defined as ju
 
 ## Examples
 
-- [Counter](http://nkzawa.github.io/hyperd/examples/counter)
-- [Counter Component](http://nkzawa.github.io/hyperd/examples/counter-component)
+- [Counter](http://nkzawa.github.io/hyperd/examples/counter) ([source](https://github.com/nkzawa/hyperd/tree/master/examples/counter/index.html))
+- [Counter Component](http://nkzawa.github.io/hyperd/examples/counter-component) ([source](https://github.com/nkzawa/hyperd/tree/master/examples/counter-component/index.html))
 - [TodoMVC](http://nkzawa.github.io/hyperd-todomvc/) ([source](https://github.com/nkzawa/hyperd-todomvc))
 
 ## API Documentation
