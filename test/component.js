@@ -111,6 +111,28 @@ describe('Component', function() {
     });
   });
 
+  describe('#onAttach', function() {
+    it('should be triggered upon attachTo', function(done) {
+      var self = this;
+      var called = false;
+      var Component = hyperd.Component.extend({
+        render: function() {
+          return '<div/>';
+        },
+        onAttach: function() {
+          expect(called).to.be.ok();
+          done();
+        }
+      });
+      var component = new Component();
+      // wait for possible event call
+      setTimeout(function() {
+        called = true;
+        component.attachTo(self.node);
+      }, 500);
+    });
+  });
+
   it('should render html', function(done) {
     var Component = hyperd.Component.extend({
       render: function() {
