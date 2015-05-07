@@ -1,7 +1,7 @@
 {
   "name": "hyperd",
   "version": "0.0.9",
-  "description": "",
+  "description": "Virtual DOM based, template engine agnostic view library",
   "keywords": [
     "virtual",
     "dom",
