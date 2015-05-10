@@ -132,13 +132,17 @@ hyperd.Component.extend({
 
 Attaches the component to a DOM node.
 
+```js
+new MyComponent().attachTo(document.getElementById('foo'));
+```
+
 #### component.render()
 
 - Return: String A html string to render.
 
 Note: **implement this function, but do NOT call it directly**.
 
-Reuired to implement. This method is called automatically and asynchronously when you update `component.data`.
+Required to implement. This method is called automatically and asynchronously when you update `component.data`.
 
 #### component.destroy()
 
@@ -230,7 +234,7 @@ The same as `component.onRender`.
 
 The same as `component.onDestroy`.
 
-#### Attribute: 'data-hkey'
+#### Attribute: data-hkey
 
 The identifier used to differentiate a node for Virtual DOM diffing. Used to reconcile an element will be reordered or destroyed.
 
